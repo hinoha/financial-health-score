@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free Financial Health Score calculator by @jdyjuanco. Input your income, expenses and assets to get your personal financial health score out of 100.">
+<title>Financial Health Score Calculator — by @jdyjuanco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#29335C;--navy-dark:#1e2747;--navy-light:#3d4a7a;
+  --blue-pale:#F0F6FF;--blue-light:#E0F1FE;--blue-med:#C6DBF0;
+  --accent:#0070C0;--text:#1a1a2e;--muted:#6b7280;--faint:#9ca3af;
+  --border:#e5e9f0;--surface:#fff;--bg:#f4f7fb;
+  --green:#2d7a4f;--green-bg:#e8f5ee;
+  --amber:#b07d1a;--amber-bg:#fdf3d8;
+  --red:#c0392b;--red-bg:#fdecea;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 1px 3px rgba(41,51,92,0.08),0 1px 2px rgba(41,51,92,0.04);
+  --shadow-md:0 4px 16px rgba(41,51,92,0.12);
+}
+html{font-size:15px}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+
+/* TOPBAR */
+.topbar{background:var(--navy);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.topbar-brand{font-family:var(--font-display);font-size:16px;color:#fff;letter-spacing:-0.2px}
+.topbar-link{font-size:12px;color:rgba(255,255,255,0.7);text-decoration:none;padding:4px 12px;border:1px solid rgba(255,255,255,0.2);border-radius:20px;transition:all 0.15s}
+.topbar-link:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+.page{max-width:680px;margin:0 auto;padding:32px 20px 64px}
+
+/* HERO */
+.hero{text-align:center;padding:32px 0 24px}
+.hero-eyebrow{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.hero-title{font-family:var(--font-display);font-size:36px;color:var(--navy);letter-spacing:-0.5px;line-height:1.15;margin-bottom:12px}
+.hero-title em{font-style:italic;color:var(--accent)}
+.hero-sub{font-size:15px;color:var(--muted);max-width:480px;margin:0 auto;font-weight:300;line-height:1.7}
+
+/* SECTION */
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;padding-left:2px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:10px;box-shadow:var(--shadow)}
+
+/* INPUT ROWS */
+.input-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.input-row:last-child{border-bottom:none;padding-bottom:0}
+.input-label{flex:1;font-size:13px;color:var(--text)}
+.input-label small{display:block;font-size:11px;color:var(--faint);margin-top:1px;font-weight:300}
+.input-wrap{display:flex;align-items:center;gap:6px}
+.input-prefix{font-size:13px;color:var(--muted);font-weight:400}
+.inp{width:130px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--blue-pale);color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;text-align:right;transition:border-color 0.15s,background 0.15s}
+.inp:focus{border-color:var(--navy);background:var(--surface);box-shadow:0 0 0 3px rgba(41,51,92,0.08)}
+.inp::placeholder{color:var(--faint)}
+
+/* CALCULATE BTN */
+.calc-btn{width:100%;height:52px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:500;font-family:var(--font-body);cursor:pointer;margin-top:20px;letter-spacing:0.01em;transition:background 0.15s,transform 0.1s}
+.calc-btn:hover{background:var(--navy-dark)}
+.calc-btn:active{transform:scale(0.99)}
+
+/* RESULTS */
+.results{display:none;margin-top:8px}
+.results.show{display:block;animation:fade-up 0.4s ease}
+@keyframes fade-up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* SCORE HERO CARD */
+.score-card{background:var(--navy);border-radius:var(--radius);padding:32px 24px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden}
+.score-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(255,255,255,0.04);border-radius:50%}
+.score-card::after{content:'';position:absolute;bottom:-60px;left:-20px;width:200px;height:200px;background:rgba(255,255,255,0.03);border-radius:50%}
+.score-eyebrow{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:8px}
+.score-number{font-family:var(--font-display);font-size:72px;color:#fff;line-height:1;letter-spacing:-2px;margin-bottom:4px}
+.score-denom{font-size:18px;color:rgba(255,255,255,0.5);font-weight:300}
+.score-grade{font-size:18px;color:#fff;font-weight:500;margin-bottom:6px}
+.score-desc{font-size:13px;color:rgba(255,255,255,0.65);font-weight:300;line-height:1.6;max-width:360px;margin:0 auto}
+
+/* SCORE RING */
+.ring-wrap{display:flex;justify-content:center;margin:16px 0}
+.ring-track{fill:none;stroke:rgba(255,255,255,0.12);stroke-width:8}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1);transform:rotate(-90deg);transform-origin:50% 50%}
+
+/* METRIC BREAKDOWN */
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.metric-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.metric-name{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0.02em}
+.metric-pts{font-size:12px;font-weight:500;padding:2px 8px;border-radius:20px}
+.pts-20{background:var(--green-bg);color:var(--green)}
+.pts-15{background:#e8f5ee;color:#2d7a4f}
+.pts-10{background:var(--amber-bg);color:var(--amber)}
+.pts-5{background:var(--red-bg);color:var(--red)}
+.metric-value{font-family:var(--font-display);font-size:22px;color:var(--text);letter-spacing:-0.3px;margin-bottom:2px}
+.metric-target{font-size:11px;color:var(--faint)}
+.metric-bar-track{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.metric-bar-fill{height:100%;border-radius:2px;transition:width 0.8s ease}
+
+/* NEXT STEPS */
+.next-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow)}
+.next-title{font-family:var(--font-display);font-size:18px;color:var(--navy);margin-bottom:4px}
+.next-sub{font-size:13px;color:var(--muted);margin-bottom:16px;font-weight:300}
+.next-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.next-row:last-child{border-bottom:none;padding-bottom:0}
+.next-num{width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.next-info h4{font-size:13px;font-weight:500;margin-bottom:2px}
+.next-info p{font-size:12px;color:var(--muted);line-height:1.5}
+.next-info a{color:var(--accent);text-decoration:none}
+.next-info a:hover{text-decoration:underline}
+
+/* SHARE */
+.share-row{display:flex;gap:8px;margin-top:16px}
+.share-btn{flex:1;height:40px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;font-size:13px;font-family:var(--font-body);cursor:pointer;color:var(--text);transition:all 0.15s}
+.share-btn:hover{background:var(--blue-pale);border-color:var(--accent);color:var(--accent)}
+.share-btn.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.share-btn.primary:hover{background:var(--navy-dark)}
+
+/* FOOTER */
+.footer{text-align:center;padding:24px 0 8px;font-size:11px;color:var(--faint);border-top:1px solid var(--border);margin-top:32px}
+.footer a{color:var(--accent);text-decoration:none}
+
+/* TOOLTIP */
+.tip{font-size:11px;color:var(--faint);font-style:italic;margin-top:6px;text-align:center}
+
+@media(max-width:560px){
+  .metric-grid{grid-template-columns:1fr}
+  .hero-title{font-size:28px}
+  .score-number{font-size:56px}
+  .inp{width:110px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">Financial Health Score</div>
+  <a href="https://linktr.ee/jdyjuanco" target="_blank" class="topbar-link">linktr.ee/jdyjuanco</a>
+</div>
+
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-eyebrow">Free calculator · by @jdyjuanco</div>
+    <h1 class="hero-title">Calculate your <em>Financial Health Score</em></h1>
+    <p class="hero-sub">Enter your numbers below and get your Financial Health Score — a personal financial health score out of 100, across 5 key metrics.</p>
+  </div>
+
+  <p class="section-label">Your income</p>
+  <div class="card">
+    <div class="input-row">
+      <div class="input-label">Monthly take-home income<small>After CPF / tax deductions</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="income" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Monthly housing cost<small>Rent or mortgage payment</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="housing" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Monthly savings<small>Amount you save each month</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="savings" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Monthly investments<small>Stocks, ETFs, bonds, CPF top-ups</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="investments" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Monthly expenses<small>Everything you spend (excl. savings + investments)</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="expenses" placeholder="0" min="0"></div>
+    </div>
+  </div>
+
+  <p class="section-label">Your assets & liabilities</p>
+  <div class="card">
+    <div class="input-row">
+      <div class="input-label">Liquid assets<small>Cash, savings accounts, stocks, bonds</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="liquid" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Total assets<small>Liquid + CPF + property + investments</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="assets" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Total liabilities<small>Loans, credit cards, mortgage balance</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="liabilities" placeholder="0" min="0"></div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Annual investment income<small>Interest, dividends, rental income per year</small></div>
+      <div class="input-wrap"><span class="input-prefix">$</span><input class="inp" type="number" id="inv_income" placeholder="0" min="0"></div>
+    </div>
+  </div>
+
+  <p class="tip">Your data stays in your browser — nothing is stored or sent anywhere.</p>
+
+  <button class="calc-btn" onclick="calculate()">Calculate my Financial Health Score</button>
+
+  <div class="results" id="results">
+
+    <p class="section-label" style="margin-top:28px">Your score</p>
+    <div class="score-card" id="score-card">
+      <div class="score-eyebrow">Financial Health Score</div>
+      <div class="ring-wrap">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="ring-track" cx="70" cy="70" r="56"/>
+          <circle class="ring-fill" id="ring" cx="70" cy="70" r="56" stroke="#C8A96E" stroke-dasharray="351.86" stroke-dashoffset="351.86"/>
+        </svg>
+      </div>
+      <div class="score-number" id="score-num">0</div>
+      <div class="score-denom">/ 100</div>
+      <div class="score-grade" id="score-grade" style="margin-top:12px"></div>
+      <div class="score-desc" id="score-desc"></div>
+    </div>
+
+    <p class="section-label">Metric breakdown</p>
+    <div class="metric-grid" id="metric-grid"></div>
+
+    <p class="section-label">What to do next</p>
+    <div class="next-card" id="next-card"></div>
+
+    <div class="share-row">
+      <button class="share-btn" onclick="copyScore()">Copy my score</button>
+      <button class="share-btn primary" onclick="window.open('https://ko-fi.com/s/e22808658b','_blank')">Get the full workbook →</button>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="footer" style="max-width:680px;margin:0 auto;padding:24px 20px 32px">
+  Financial Health Score · by <a href="https://linktr.ee/jdyjuanco" target="_blank">@jdyjuanco</a>
+  &nbsp;·&nbsp; For informational purposes only — not financial advice
+  &nbsp;·&nbsp; <a href="https://ko-fi.com/s/e22808658b" target="_blank">Get the Personal Finance Workbook</a>
+</div>
+
+<script>
+const CIRCUMFERENCE = 2 * Math.PI * 56;
+
+function scoreMetric(value, thresholds, points) {
+  for (let i = 0; i < thresholds.length; i++) {
+    if (thresholds[i].fn(value)) return points[i];
+  }
+  return points[points.length - 1];
+}
+
+function fmt(n, decimals=0) {
+  if (isNaN(n) || !isFinite(n)) return '—';
+  return n.toLocaleString('en-SG', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function fmtMoney(n) {
+  if (isNaN(n) || !isFinite(n)) return '—';
+  return '$' + Math.round(n).toLocaleString('en-SG');
+}
+
+function calculate() {
+  const income      = parseFloat(document.getElementById('income').value) || 0;
+  const housing     = parseFloat(document.getElementById('housing').value) || 0;
+  const savings     = parseFloat(document.getElementById('savings').value) || 0;
+  const investments = parseFloat(document.getElementById('investments').value) || 0;
+  const expenses    = parseFloat(document.getElementById('expenses').value) || 0;
+  const liquid      = parseFloat(document.getElementById('liquid').value) || 0;
+  const assets      = parseFloat(document.getElementById('assets').value) || 0;
+  const liabilities = parseFloat(document.getElementById('liabilities').value) || 0;
+  const inv_income  = parseFloat(document.getElementById('inv_income').value) || 0;
+
+  if (income === 0) { alert('Please enter your monthly income to continue.'); return; }
+
+  const netWorth        = assets - liabilities;
+  const monthlyExp      = expenses || 1;
+  const wealthBuilding  = income > 0 ? (savings + investments) / income : 0;
+  const liquidity       = liquid / monthlyExp;
+  const wealthRunway    = netWorth / monthlyExp;
+  const housingPct      = income > 0 ? housing / income : 0;
+  const roa             = assets > 0 ? inv_income / assets : 0;
+
+  // Score each metric (max 20 each)
+  const s_wb  = wealthBuilding >= 0.25 ? 20 : wealthBuilding >= 0.15 ? 15 : wealthBuilding >= 0.05 ? 10 : 5;
+  const s_liq = liquidity >= 12 ? 20 : liquidity >= 6 ? 15 : liquidity >= 3 ? 10 : 5;
+  const s_wr  = wealthRunway >= 36 ? 20 : wealthRunway >= 24 ? 15 : wealthRunway >= 12 ? 10 : 5;
+  const s_hse = housingPct <= 0.20 ? 20 : housingPct <= 0.33 ? 15 : housingPct <= 0.40 ? 10 : 5;
+  const s_roa = roa >= 0.05 ? 20 : roa >= 0.03 ? 15 : roa >= 0.01 ? 10 : 5;
+  const total = s_wb + s_liq + s_wr + s_hse + s_roa;
+
+  const grades = [
+    [85, 'Excellent', 'Your finances are in strong shape. You\'re building wealth intentionally and your safety nets are solid.'],
+    [70, 'Good', 'You\'re on the right track. A few areas to tighten up will push you to the next level.'],
+    [50, 'Building', 'You have a foundation — now it\'s about strengthening your systems and closing the gaps.'],
+    [0,  'Needs attention', 'Your finances need a clearer system. The good news: clarity is the first step, and you\'re already here.'],
+  ];
+
+  let grade, desc;
+  for (const [min, g, d] of grades) {
+    if (total >= min) { grade = g; desc = d; break; }
+  }
+
+  // Animate score number
+  const scoreEl = document.getElementById('score-num');
+  let current = 0;
+  const interval = setInterval(() => {
+    current = Math.min(current + Math.ceil(total / 30), total);
+    scoreEl.textContent = current;
+    if (current >= total) clearInterval(interval);
+  }, 30);
+
+  // Animate ring
+  const ring = document.getElementById('ring');
+  const offset = CIRCUMFERENCE - (total / 100) * CIRCUMFERENCE;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+
+  document.getElementById('score-grade').textContent = grade;
+  document.getElementById('score-desc').textContent = desc;
+
+  // Metric breakdown
+  const metrics = [
+    {
+      name: '📦 Wealth-building rate',
+      value: income > 0 ? Math.round(wealthBuilding * 100) + '%' : '—',
+      pts: s_wb,
+      target: 'Target: >20%',
+      bar: Math.min(100, Math.round(wealthBuilding * 100 / 25 * 100)),
+      tip: s_wb < 20 ? 'Increase your monthly savings or investments.' : 'Strong — keep it up.'
+    },
+    {
+      name: '💧 Liquidity',
+      value: income > 0 ? fmt(liquidity, 1) + ' months' : '—',
+      pts: s_liq,
+      target: 'Target: 6–12 months',
+      bar: Math.min(100, Math.round(liquidity / 12 * 100)),
+      tip: s_liq < 15 ? 'Build up your liquid savings buffer.' : 'Good safety net.'
+    },
+    {
+      name: '💎 Wealth runway',
+      value: income > 0 ? fmt(wealthRunway, 1) + ' months' : '—',
+      pts: s_wr,
+      target: 'Target: >24 months',
+      bar: Math.min(100, Math.round(wealthRunway / 36 * 100)),
+      tip: s_wr < 15 ? 'Grow your net worth and reduce expenses.' : 'Solid runway.'
+    },
+    {
+      name: '🏠 Housing %',
+      value: income > 0 ? Math.round(housingPct * 100) + '%' : '—',
+      pts: s_hse,
+      target: 'Target: ≤33%',
+      bar: Math.min(100, Math.round((1 - housingPct) * 100)),
+      tip: s_hse < 15 ? 'Housing is eating a large share of income.' : 'Housing cost is healthy.'
+    },
+    {
+      name: '📈 Return on assets',
+      value: assets > 0 ? fmt(roa * 100, 1) + '%' : '—',
+      pts: s_roa,
+      target: 'Target: >3%',
+      bar: Math.min(100, Math.round(roa * 100 / 5 * 100)),
+      tip: s_roa < 15 ? 'Put more assets to work — ETFs, dividends, bonds.' : 'Assets working well.'
+    },
+  ];
+
+  const ptsClass = p => p === 20 ? 'pts-20' : p === 15 ? 'pts-15' : p === 10 ? 'pts-10' : 'pts-5';
+  const barColor = p => p === 20 ? '#639922' : p === 15 ? '#2d7a4f' : p === 10 ? '#EF9F27' : '#E24B4A';
+
+  // Add net worth as 6th card (display only, not scored)
+  const grid = document.getElementById('metric-grid');
+  grid.innerHTML = metrics.map(m => `
+    <div class="metric-card">
+      <div class="metric-header">
+        <span class="metric-name">${m.name}</span>
+        <span class="metric-pts ${ptsClass(m.pts)}">${m.pts} / 20</span>
+      </div>
+      <div class="metric-value">${m.value}</div>
+      <div class="metric-target">${m.target}</div>
+      <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${m.bar}%;background:${barColor(m.pts)}"></div></div>
+      <div style="font-size:11px;color:${m.pts>=15?'var(--green)':m.pts===10?'var(--amber)':'var(--red)'};margin-top:6px;font-style:italic">${m.tip}</div>
+    </div>`).join('') +
+    `<div class="metric-card" style="border-color:${netWorth>0?'#c0dd97':'#f09595'}">
+      <div class="metric-header">
+        <span class="metric-name">📊 Net worth</span>
+        <span class="metric-pts" style="background:${netWorth>0?'var(--green-bg)':'var(--red-bg)'};color:${netWorth>0?'var(--green)':'var(--red)'}">${netWorth>0?'Positive':'Negative'}</span>
+      </div>
+      <div class="metric-value">${fmtMoney(netWorth)}</div>
+      <div class="metric-target">Assets ${fmtMoney(assets)} · Liabilities ${fmtMoney(liabilities)}</div>
+      <div class="metric-bar-track"><div class="metric-bar-fill" style="width:${assets>0?Math.min(100,Math.round(netWorth/assets*100)):0}%;background:${netWorth>0?'#639922':'#E24B4A'}"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">Not included in score — tracked separately</div>
+    </div>`;
+
+  // Next steps based on lowest scoring metrics
+  const lowest = [...metrics].sort((a,b) => a.pts - b.pts).slice(0,3);
+  const nextSteps = [
+    { title: 'Track your daily spending', desc: 'Use the Budget Tracker to log expenses as they happen and spot where money leaks.', link: 'https://ko-fi.com/s/9c680f87d3', cta: 'Get Budget Tracker →' },
+    { title: 'Build your complete financial picture', desc: 'The Personal Finance Workbook gives you income tracking, net worth history, and a 10-year wealth forecast in Excel.', link: 'https://ko-fi.com/s/e22808658b', cta: 'Get the Workbook →' },
+    { title: 'Get 1:1 support', desc: 'Work with Johanna directly to map your next financial move with clarity and intention.', link: 'https://linktr.ee/jdyjuanco', cta: 'Book a session →' },
+  ];
+
+  document.getElementById('next-card').innerHTML = `
+    <div class="next-title">Your next steps</div>
+    <div class="next-sub">Based on your score of ${total}/100 — here's where to focus</div>
+    ${nextSteps.map((s,i) => `
+    <div class="next-row">
+      <div class="next-num">${i+1}</div>
+      <div class="next-info">
+        <h4>${s.title}</h4>
+        <p>${s.desc} <a href="${s.link}" target="_blank">${s.cta}</a></p>
+      </div>
+    </div>`).join('')}`;
+
+  // Show results
+  const resultsEl = document.getElementById('results');
+  resultsEl.classList.add('show');
+  resultsEl.style.display = 'block';
+  setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+
+  // Store for copy
+  window._lastScore = total;
+  window._lastGrade = grade;
+}
+
+function copyScore() {
+  const s = window._lastScore;
+  const g = window._lastGrade;
+  const text = `My Financial Health Score is ${s}/100 — ${g}. Calculate yours free at linktr.ee/jdyjuanco`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.share-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy my score', 2000);
+  }).catch(() => alert(`My Financial Health Score: ${s}/100 — ${g}\nlinktr.ee/jdyjuanco`));
+}
+
+// Allow Enter key to trigger calculate
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') calculate();
+});
+</script>
+</body>
+</html>
